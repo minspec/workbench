@@ -1,0 +1,20 @@
+# Serena project config for the MinSpec workbench — tracked, so every
+# worktree carries the same scope. Serena serves the application source;
+# Mate (vendor/bin/mate) serves the application's runtime truth. The two
+# are complementary and both ride each worktree.
+project_name: "minspec-workbench"
+
+# PHP via Phpactor: Serena manages it as a PHAR (PHP >= 8.1 required,
+# no Node). Chosen over Intelephense because this machine runs no Node.
+languages: ["php_phpactor"]
+
+encoding: "utf-8"
+
+ignore_all_files_in_gitignore: true
+
+# Generated and vendored trees are not source to assist.
+ignored_paths:
+  - "var/**"
+  - "vendor/**"
+
+read_only: false
