@@ -15,8 +15,10 @@ encoded form.
 ## The pattern is configuration, never tree content
 
 - The pattern is an extended, case-insensitive regular expression read
-  from the environment variable `TERM_WALL`. In CI the action takes it
-  from the org-level Actions variable `vars.TERM_WALL`. Locally the
+  from the environment variable `TERM_WALL`. In CI the calling step
+  passes it: `env: TERM_WALL: ${{ vars.TERM_WALL }}` — a composite
+  action cannot read `vars` itself, so the action declares no default
+  and refuses when the step did not pass one. Locally the
   Python check reads `TERM_WALL`, falling back to the gitignored file
   `<root>/ops/bin/term-wall.conf` (one line: the pattern).
 - No tracked file may contain the pattern, a piece of it, or any
@@ -78,7 +80,7 @@ colon. The raw matched text never appears in any output.
 
 ## Self-test (the `.github` repo's own ci)
 
-With `TERM_WALL_PLANT` as the planted fault: a planted file fires
+With the calling step passing `env: TERM_WALL_PLANT: ${{ vars.TERM_WALL_PLANT }}` as the planted fault: a planted file fires
 (exit 1, masked hit), a clean neighbour stays quiet (exit 0), and an
 empty `TERM_WALL` refuses (exit 2).
 
