@@ -50,11 +50,31 @@ range of commit messages (`--range BASE..HEAD`), or `--stdin`.
 
 | exit | meaning |
 |---|---|
-| 0 | clean; one summary line on stdout |
-| 1 | at least one hit; every hit printed on stdout as `<surface>: <location>: <line with each match replaced by [forbidden name]>`; a surface that could not be read (fetch failed, payload unreadable) is itself a hit — could-not-look is never a pass |
-| 2 | refusal: pattern unset/empty, not a git work tree, missing message file, unresolvable range; stdout empty, one stderr line `class: expected …; found …; needed …` |
+| 0 | clean; exactly one summary line on stdout |
+| 1 | at least one hit, every hit printed on stdout in the pinned format below; a surface that could not be read (fetch failed, payload unreadable) is itself a hit — could-not-look is never a pass |
+| 2 | refusal; stdout empty, one stderr line `<class>: expected …; found …; needed …` |
 
-The raw matched text never appears in any output.
+Refusal classes: `pattern` (unset or empty), `git work tree` (not
+inside one), `message` (missing message file), `range` (unresolvable).
+
+## Hit format, pinned
+
+One stdout line per hit: `<surface>: <location>: <line with each
+match replaced by [forbidden name]>`. The location never contains a
+colon. The raw matched text never appears in any output.
+
+| surface | location |
+|---|---|
+| `content` | `<path> line <n>` |
+| `path` | `<path>` |
+| `commit messages` | `<sha12> line <n>` |
+| `pull request title` | `line <n>` |
+| `pull request body` | `line <n>` |
+| `branch name` | `<name>` |
+| `event payload` | `<payload path>` — the hit when the payload cannot be read |
+| `message` (`--message-file`) | `line <n>` |
+| `range` (`--range`) | `<sha12> line <n>` |
+| `stdin` | `line <n>` |
 
 ## Self-test (the `.github` repo's own ci)
 
