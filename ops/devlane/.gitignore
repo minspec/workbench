@@ -5,3 +5,4 @@ __pycache__/
 # The lever SOURCE (levers/*.sh, levers/claude, levers/codex, README)
 # is tracked; everything a run WRITES under jobs/ is never committed.
 dispatch/levers/jobs/
+dispatch/levers/**/jobs/
