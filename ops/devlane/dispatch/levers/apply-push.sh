@@ -272,8 +272,12 @@ hits=[]
 home=re.compile(r"/home/[A-Za-z0-9._-]+/")
 # credential filenames introduced as content
 cred=re.compile(r"\b(auth\.json|id_rsa|id_ed25519|\.pem|\.p12|credentials(\.json)?)\b")
+# names this organisation does not use — never affirmed, negated, or cited
+wall=re.compile(r"s[c]ient[ _-]?db|u[s]cient",re.I)
 for p,text in added:
     pth=p or "(unknown)"
+    if wall.search(text) or wall.search(pth):
+        hits.append(f"{wall.sub('[forbidden name]',pth)}: forbidden name in added content or path")
     # runtime job capture path anywhere in an added line or as the file itself
     if "levers/jobs/" in (pth+" "+text):
         hits.append(f"{pth}: runtime job-capture content ('levers/jobs/')")
@@ -304,6 +308,7 @@ import re,sys
 src,out,job,digest=sys.argv[1:]
 s=open(src,encoding="utf-8").read().rstrip()
 if "\x00" in s or not s.strip(): raise SystemExit(1)
+if re.search(r"s[c]ient[ _-]?db|u[s]cient",s,re.I): raise SystemExit(2)  # the term wall, on the message
 trailer=re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*: .+$")
 caller_last=re.split(r"\n[ \t]*\n",s)[-1].splitlines()
 separator="\n" if caller_last and all(trailer.match(x) for x in caller_last) else "\n\n"
@@ -314,7 +319,10 @@ if len(last)<2 or not all(trailer.match(x) for x in last): raise SystemExit(1)
 open(out,"w",encoding="utf-8").write(s)
 PY
 then
-    refuse "landing message/trailer block is not a contiguous final paragraph"
+    case $? in
+        2) refuse "landing message carries a forbidden name — a name this organisation does not use; found in the message; needed a message without it" ;;
+        *) refuse "landing message/trailer block is not a contiguous final paragraph" ;;
+    esac
 fi
 
 if ! env -i HOME="$OPERATOR_HOME" PATH="$SAFE_PATH" LANG=C.UTF-8 LC_ALL=C.UTF-8 \
