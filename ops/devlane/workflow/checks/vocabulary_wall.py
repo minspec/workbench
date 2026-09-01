@@ -50,7 +50,7 @@ ALLOWED_PREFIXES = (".dev/", ".git/", ".github/", ".claude/", ".serena/")
 #: `ruff.toml` joins them for the same reason as the dot-directories:
 #: it configures how this repo is worked on, and it cannot do that
 #: without naming dev-lane paths — a per-file rule for
-#: `.dev/app/workflow/wf.py` contains a reserved word in the PATH.
+#: `ops/devlane/workflow/wf.py` contains a reserved word in the PATH.
 ALLOWED_FILES = ("AGENTS.md", "CONTRIB.md", "README.md", "ruff.toml")
 
 TEXT_SUFFIXES = {".md", ".txt", ".rst", ".adoc", ".cue", ".toml", ".yaml", ".yml"}
@@ -221,8 +221,8 @@ def main() -> int:
             )
             rel = path.relative_to(root).as_posix()
             defines_rule = (
-                rel == ".dev/app/workflow/checks/vocabulary_wall.py"
-                or rel.startswith(".dev/app/workflow/tests/")
+                rel == "ops/devlane/workflow/checks/vocabulary_wall.py"
+                or rel.startswith("ops/devlane/workflow/tests/")
             )
             if not defines_rule and path.suffix.lower() in {".py", ".json", ".yaml", ".yml"}:
                 patterns_here.extend(
