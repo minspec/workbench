@@ -1,0 +1,7 @@
+{
+  "harness": "codex",
+  "cli_version": "unseen-in-records",
+  "captured": "constructed-2026-08-29",
+  "source": "harness-research.md §4: stdout is NDJSON events; the last agent_message holds the final message. No closed record on 2026-08-28/29 used --json -o, so these bytes are docs-shaped, not a session dump.",
+  "shape": "NDJSON: thread.started, turn.started, item.completed{agent_message.text = envelope JSON}"
+}

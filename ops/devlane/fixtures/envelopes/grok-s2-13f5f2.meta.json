@@ -1,0 +1,11 @@
+{
+  "harness": "grok",
+  "cli_version": "unknown",
+  "captured": "2026-08-28",
+  "records": [
+    "20260828T222028Z-tests-grok-13f5f2"
+  ],
+  "source": "verbatim job-dir raw.out of 20260828T222028Z-tests-grok-13f5f2. The record closed envelope-parse: no JSON object on stdout; harness.version is unknown on the record (research §1.1).",
+  "shape": "narration immediately followed by a single-line JSON object, no newline before the opening brace",
+  "note": "Copied byte-for-byte from the job dir, never edited, per D-E2E-2. The object is present; today's last-brace scan misses it."
+}

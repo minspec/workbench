@@ -1,0 +1,19 @@
+{
+  "kind": "receipt",
+  "claim": "the suite passes at this commit",
+  "argv": [
+    "python3",
+    ".dev/app/workflow/tests/shard.py",
+    "1",
+    "0"
+  ],
+  "cwd": ".",
+  "head_sha": "96367372e5f782583f14585ba7925e51be16b028b3dc9ed13160e1205ac59afb",
+  "tree_dirty": false,
+  "exit_code": 0,
+  "duration_ms": 154955,
+  "stdout_sha256": "de2eceeec05f69a60fd4eab6533924e7b74c18b4216ac36657972db8645690df",
+  "stderr_sha256": "e93abd5880a01334c3d4c84037d28382c2d93228e88887b5008ab0d12c01e6c8",
+  "actor": "Claude Opus 5",
+  "at": "2026-08-23T10:00:00Z"
+}

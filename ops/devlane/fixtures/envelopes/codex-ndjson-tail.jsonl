@@ -1,0 +1,3 @@
+{"type":"thread.started","thread_id":"00000000-0000-4000-8000-000000000001"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"type":"agent_message","text":"{\"job\":\"plan\",\"status\":\"ok\",\"verdict\":\"approve\",\"counts\":{\"p1\":0,\"p2\":0,\"p3\":0,\"opinions\":0},\"findings\":[],\"artifacts\":{},\"spend\":{\"harness\":\"codex\",\"total\":0,\"out\":0,\"runs\":1},\"stamp\":{\"ref\":\"harness-placeholder\",\"started\":null,\"ended\":null},\"note\":\"u10-codex-agent-message\"}"}}

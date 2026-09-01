@@ -1,0 +1,8 @@
+{
+  "harness": "grok",
+  "cli_version": "unseen-in-records",
+  "captured": "constructed-2026-08-29",
+  "source": "docs-shaped allowed nine-key object after a narration sentence, for the fallback-scan happy path. Not a session dump. The captured S2 bytes live in grok-s2-13f5f2.raw.out.",
+  "shape": "narration sentence immediately followed by a single-line JSON envelope matching ENVELOPE_SCHEMA, no newline before the opening brace",
+  "note": "Constructed so the fallback scan can be shown to accept an allowed envelope. Regenerated, never presented as captured bytes."
+}

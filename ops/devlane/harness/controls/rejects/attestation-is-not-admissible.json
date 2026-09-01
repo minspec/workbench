@@ -1,0 +1,24 @@
+{
+  "kind": "attestation",
+  "claim": "the packet's rule is not decided by the specification",
+  "attestor": {
+    "name": "an actor nobody admitted",
+    "kind": "model",
+    "resolved": "grok-4.6",
+    "withheld": [
+      "the repository"
+    ]
+  },
+  "saw": "13d9dd9c30a24eeab172802e8aa0f546c4d0582c8797629d5699bc0ce2e5a0d4",
+  "grounding": {
+    "quotes_verbatim": true,
+    "required_citations": [
+      "specification",
+      "observation"
+    ],
+    "citations_met": true,
+    "checked_by": "vet.py"
+  },
+  "at": "2026-08-23T10:00:00Z",
+  "not_reproducible_because": "judgement"
+}

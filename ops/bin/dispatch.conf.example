@@ -1,0 +1,21 @@
+# Copy to dispatch.conf. The real dispatch.conf is gitignored: it is
+# owner-owned, machine-specific config sourced by dispatch.sh, never a
+# public artifact. A missing conf refuses loudly — it is not inferred.
+#
+# LAUNCHER_PIN is optional. Left empty, dispatch.sh finds the launcher next
+# to itself (../devlane/dispatch/launch.py) — portable across worktrees and
+# machines. Set it to an ABSOLUTE launch.py path only if you want the hard
+# supply-chain lock (dispatch then runs exactly that launcher and no other).
+#
+# Owner allow rule (adding it is the owner's act):
+# "Bash(bash /ABSOLUTE/PATH/TO/minspec/workbench/ops/bin/dispatch.sh:*)"
+# Values may be overridden per call by an environment variable of the same
+# name, then by the corresponding flag.
+
+LAUNCHER_PIN=''
+DEFAULT_TIMEOUT='300'
+WF_AGENT_DEFAULT='GPT-5.6 Sol <noreply@openai.com>'
+MODEL_GROK='grok-4.6'
+MODEL_CODEX='gpt-5.6-sol'
+MODEL_CLAUDE_READ='claude-opus-5'
+MODEL_CLAUDE_PLAN='claude-fable-5'
