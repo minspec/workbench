@@ -1,0 +1,29 @@
+Here is the envelope:
+
+```json
+{
+  "job": "plan",
+  "status": "ok",
+  "verdict": "changes",
+  "counts": {
+    "p1": 0,
+    "p2": 0,
+    "p3": 0,
+    "opinions": 0
+  },
+  "findings": [],
+  "artifacts": {},
+  "spend": {
+    "harness": "grok",
+    "total": 0,
+    "out": 0,
+    "runs": 1
+  },
+  "stamp": {
+    "ref": "harness-placeholder",
+    "started": null,
+    "ended": null
+  },
+  "note": "u10-grok-fenced"
+}
+```

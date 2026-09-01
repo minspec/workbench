@@ -1,0 +1,8 @@
+{
+  "derived_from": "controls/dispatchable-flags.json",
+  "change": "harness.isolation.flags \u2014 replaced",
+  "expect_path": "harness.isolation.flags",
+  "why": "for a flags-mechanism harness the argv is the isolation, so declaring it absent is the same missing evidence in a complete record",
+  "finding": "Codex, PR #40",
+  "generated_by": "controls/build.py"
+}

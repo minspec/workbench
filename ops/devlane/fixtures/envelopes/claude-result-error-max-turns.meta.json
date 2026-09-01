@@ -1,0 +1,7 @@
+{
+  "harness": "claude",
+  "cli_version": "unseen-in-records",
+  "captured": "constructed-2026-08-29",
+  "source": "docs-claude-headless result wrapper; subtype names from harness-research.md U4b.3 / S33-S34 (error_max_turns). No closed record on 2026-08-28/29 used --output-format json, so these bytes are docs-shaped, not a session dump.",
+  "shape": "one JSON object {type:result, subtype:error_max_turns, is_error:true} with result a string and no structured_output"
+}

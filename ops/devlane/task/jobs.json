@@ -1,0 +1,91 @@
+{
+ "verify": {
+  "adapter": "direct",
+  "deliverable": "one claim, executed: a reproduction or a refutation",
+  "prompt": null,
+  "constraints": [
+   "read only",
+   "never edit the snapshot"
+  ]
+ },
+ "adversarial-review": {
+  "adapter": "harness",
+  "deliverable": "findings that survived the task's own attempt to refute them",
+  "role": "read",
+  "snapshot": "whole",
+  "caps": {"timeout": 1200},
+  "prompt": "Review the change at {ref} against {base}. The diff is {diff}. Review only — do not edit.\nAim at: {scope}\nInputs named by the brief are files under in/, a sibling of out/; read them whole before working.\nAnswer with a single JSON object and nothing else, carrying exactly these keys: job, status, verdict, counts, findings, artifacts, spend, stamp, note. Prose is not a deliverable here — the CONTRIB.md wire block is the human review format, not this job's stdout.",
+  "constraints": [
+   "read only",
+   "do not edit the snapshot"
+  ]
+ },
+ "author-tests": {
+  "adapter": "harness",
+  "deliverable": "a test file that has been run and is red for the stated reason",
+  "role": "write",
+  "snapshot": "whole",
+  "caps": {"timeout": 1800},
+  "prompt": "Write tests from the contract at {scope}, for the tree at {ref}. Do not read the implementation. Prove each test red for its own assertion before making it green. Commit each test file as soon as its red is proven — if committing is denied, write it to disk at once — so a run killed at the wall leaves finished work, not residue.\nInputs named by the brief are files under in/, a sibling of out/; read them whole before working.\nAnswer with a single JSON object and nothing else, carrying exactly these keys: job, status, verdict, counts, findings, artifacts, spend, stamp, note (and, for a write job that could not commit, commit).",
+  "constraints": [
+   "do not edit the implementation",
+   "no network"
+  ]
+ },
+ "sweep": {
+  "adapter": "harness",
+  "deliverable": "structured findings over disjoint categories, merged",
+  "role": "read",
+  "snapshot": "whole",
+  "prompt": "Sweep the tree at {ref} for defects in these categories, and ONLY these: {scope}. The categories are disjoint — report each finding under exactly one, and do not repeat a finding across categories.\nCover every category. A category you looked at and found nothing in is a category with zero findings, which is not the same as one you did not look at — if you could not cover one, say so in note and return status invalid rather than reporting a partial sweep as a complete one.\nEvery finding carries a reproduce command that re-derives it; a finding without one is an opinion and does not belong in the list.\nReview only — do not edit.\nInputs named by the brief are files under in/, a sibling of out/; read them whole before working.\nAnswer with a single JSON object and nothing else, carrying exactly these keys: job, status, verdict, counts, findings, artifacts, spend, stamp, note.",
+  "constraints": [
+   "read only",
+   "do not edit the snapshot"
+  ]
+ },
+ "plan": {
+  "adapter": "harness",
+  "deliverable": "a plan written to the job's out/PLAN.md, and an envelope naming it",
+  "role": "read",
+  "snapshot": "whole",
+  "prompt": "Write a plan for the scope below, for the tree at {ref}. Read the snapshot and nothing else. Write the plan to {out}/PLAN.md and name that path in artifacts. Do not edit the snapshot.\nScope: {scope}\nIf you judge you are running long, stop and write up what you have.\nInputs named by the brief are files under in/, a sibling of out/; read them whole before working.\nAnswer with a single JSON object and nothing else, carrying exactly these keys: job, status, verdict, counts, findings, artifacts, spend, stamp, note.",
+  "constraints": [
+   "read only",
+   "do not edit the snapshot"
+  ]
+ },
+ "check-tests": {
+  "adapter": "harness",
+  "deliverable": "a skeptic's report at the job's out/SKEPTIC.md; verdict changes when any test is refuted",
+  "role": "read",
+  "snapshot": "whole",
+  "caps": {"timeout": 1800},
+  "prompt": "Adopt the role card at ops/process/roles/test-skeptic.md in the tree at {ref}. Judge the tests at {inputs} against the contract named here: {scope}. Do not read any implementation. Refute by default: a test survives only when you can name the broken implementation it would catch. Every refuted or weak test is a finding carrying a reproduce command; verdict is changes when any finding exists and approve otherwise. Write the report to {out}/SKEPTIC.md and name that path in artifacts. Review only — do not edit.\nInputs named by the brief are files under in/, a sibling of out/; read them whole before working.\nAnswer with a single JSON object and nothing else, carrying exactly these keys: job, status, verdict, counts, findings, artifacts, spend, stamp, note.",
+  "constraints": [
+   "read only",
+   "do not edit the snapshot"
+  ]
+ },
+ "implement": {
+  "adapter": "harness",
+  "deliverable": "commits in the snapshot that make the named test command pass, trailers per AGENTS.md",
+  "role": "write",
+  "snapshot": "whole",
+  "prompt": "In the tree at {ref}, implement whatever makes this command exit 0: {scope}. Commit in the snapshot as you go, with the trailers AGENTS.md requires; do not edit the files the tests live in, and do not touch the command itself. Record each command you ran as a finding with a reproduce entry. Status is ok only when the named command exits 0 in your final tree; otherwise status is invalid and note names the failing test. Commit if you can; if the sandbox refuses git commit, status stays ok and you write your message to out/COMMIT_MSG (or a commit object with keys subject and body in the envelope) — the launcher commits your tree with that message and your attribution (codex only; grok and claude commit themselves). Verdict is null.\nInputs named by the brief are files under in/, a sibling of out/; read them whole before working.\nAnswer with a single JSON object and nothing else, carrying exactly these keys: job, status, verdict, counts, findings, artifacts, spend, stamp, note (and, for a write job that could not commit, commit).",
+  "constraints": [
+   "do not edit the files the tests live in",
+   "no network"
+  ]
+ },
+ "adjudicate": {
+  "adapter": "harness",
+  "deliverable": "a ruling at the job's out/RULING.md: UPHELD, PARTIAL or REJECTED per finding, and what the reviewers missed",
+  "role": "read",
+  "snapshot": "whole",
+  "prompt": "Rule on the reviews at {inputs} of the artifact at {ref}. You are given the artifact at that ref and the reports verbatim, and nothing else. Rule UPHELD, PARTIAL or REJECTED per finding, each ruling grounded in a reproduction against the tree, then state what the reviewers missed. Write the ruling to {out}/RULING.md and name that path in artifacts. Review only — do not edit.\nInputs named by the brief are files under in/, a sibling of out/; read them whole before working.\nAnswer with a single JSON object and nothing else, carrying exactly these keys: job, status, verdict, counts, findings, artifacts, spend, stamp, note.",
+  "constraints": [
+   "read only",
+   "do not edit the snapshot"
+  ]
+ }
+}
