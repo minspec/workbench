@@ -1,0 +1,53 @@
+#!/bin/sh
+# commit-msg -- refuse a trailer git will not parse (ops/devlane/hooks).
+#
+# UNLIKE the recorders beside it. post-checkout and post-commit swallow
+# every failure and always exit 0, because a broken recorder must never
+# stop work. This one is a gate: refusing is the entire point, and it is
+# the only hook here that can fail a commit.
+#
+# It exists because the defect it catches is created here and nowhere
+# else, and is invisible everywhere else. A blank line between two
+# trailers demotes everything above it to body text; `git commit` still
+# exits 0 and `git log` still prints the line. Measured 2026-08-24: 50
+# of 243 commits across three branches carry a `Source:` line git cannot
+# parse, including the commit that applied a review's attribution
+# findings. It was found and hand-fixed before, and came back.
+#
+# A run that cannot check refuses rather than passing quietly, per
+# AGENTS.md. `git commit --no-verify` is the deliberate way past.
+
+set -u
+
+msg_file=${1:-}
+[ -n "$msg_file" ] || { echo "commit-msg: no message file given" >&2; exit 1; }
+
+top=$(git rev-parse --show-toplevel 2>/dev/null) || {
+    echo "commit-msg: not inside a work tree" >&2
+    exit 1
+}
+check="$top/ops/devlane/workflow/checks/commit_trailers.py"
+
+# When the hook cannot run it WARNS and lets the commit through, and the
+# distinction is deliberate. This hook is local convenience, not the
+# gate: the gate is `dev: gates (commit-trailers)` in CI, which runs the
+# same checker over the branch's commits and cannot be dodged. Blocking
+# every commit in a clone that happens to lack the checker -- a linked
+# worktree mid-checkout, a shallow clone, a machine without python --
+# would stop work for an environment problem, not a bad message. It
+# refuses for the one thing it is here to judge: the message.
+if [ ! -f "$check" ] || ! command -v python3 >/dev/null 2>&1; then
+    echo "commit-msg: cannot check trailers here (checker or python3" >&2
+    echo "            missing) — letting the commit through. CI still" >&2
+    echo "            gates this: dev: gates (commit-trailers)." >&2
+    exit 0
+fi
+
+python3 "$check" --message-file "$msg_file" || {
+    echo "" >&2
+    echo "commit-msg: the message above was NOT committed." >&2
+    echo "            Move the trailer into the final block — one" >&2
+    echo "            contiguous paragraph, no blank line between" >&2
+    echo "            Source: and Co-Authored-By:." >&2
+    exit 1
+}
