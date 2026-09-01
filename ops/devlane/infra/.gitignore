@@ -1,0 +1,3 @@
+gitea/runtime/*
+!gitea/runtime/.keep
+gitea/runner-token.seed

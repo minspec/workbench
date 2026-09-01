@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+
+# Runtime dispatch output — job captures, snapshots, isolated HOMEs.
+# The lever SOURCE (levers/*.sh, levers/claude, levers/codex, README)
+# is tracked; everything a run WRITES under jobs/ is never committed.
+dispatch/levers/jobs/
+dispatch/levers/**/jobs/

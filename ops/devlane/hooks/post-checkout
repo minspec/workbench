@@ -1,0 +1,44 @@
+#!/bin/sh
+# post-checkout -- git-native crossing recorder (ops/devlane/hooks).
+#
+# Appends one JSONL entry to the clone-shared context stream when a
+# branch checkout happens (arg 3, the flag, is 1). File checkouts
+# (flag 0) are not crossings and are ignored.
+#
+# This hook must never break git: every failure path is swallowed and
+# the exit status is always 0. If the stream cannot be written, the
+# record is lost and the checkout succeeds anyway.
+
+json_escape() {
+    # Control characters would split or corrupt the JSONL record; they
+    # are never legitimate in these values, so newline/tab/CR become
+    # spaces and the rest are dropped before quoting is escaped.
+    printf '%s' "$1" | tr '\n\r\t' '   ' | tr -d '\000-\037' \
+        | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
+}
+
+record() {
+    common=$(git rev-parse --git-common-dir) || return 0
+    [ -n "$common" ] || return 0
+    top=$(git rev-parse --show-toplevel) || return 0
+    worktree=$(basename "$top") || return 0
+    agent="${WF_AGENT:-${USER:-unknown}}"
+    at=$(date -u +%Y-%m-%dT%H:%M:%SZ) || return 0
+    printf '{"at": "%s", "kind": "%s", "what": "%s", "detail": "", "agent": "%s", "worktree": "%s", "via": "git-hook"}\n' \
+        "$(json_escape "$at")" "$(json_escape "$1")" "$(json_escape "$2")" \
+        "$(json_escape "$agent")" "$(json_escape "$worktree")" \
+        >>"$common/claude-context-stream.jsonl" || return 0
+}
+
+main() {
+    [ "${3:-}" = "1" ] || return 0
+    # symbolic-ref answers for unborn branches (checkout --orphan),
+    # where rev-parse fails; rev-parse covers detached HEAD.
+    branch=$(git symbolic-ref --short -q HEAD) \
+        || branch=$(git rev-parse --abbrev-ref HEAD) || return 0
+    [ -n "$branch" ] || return 0
+    record "branch" "switched to $branch"
+}
+
+main "$@" >/dev/null 2>&1 || :
+exit 0

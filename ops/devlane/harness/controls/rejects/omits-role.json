@@ -1,0 +1,129 @@
+{
+  "harness": {
+    "name": "codex",
+    "version": "0.148.0",
+    "isolation": {
+      "mechanism": "home",
+      "flags": {
+        "declared_absent": "codex suppresses discovery by home, not argv"
+      },
+      "env": {
+        "CODEX_HOME": "/snapshot/.harness-home"
+      },
+      "observed": {
+        "operator_config_present": false,
+        "evidence": "unisolated dispatch loaded: ~/.codex/hooks.json SessionStart ran projects/xormania/xor/tools/xortations/hooks/session_start.py",
+        "checked_at": "2026-08-22",
+        "harness_version": "0.148.0"
+      },
+      "home": "/snapshot/.harness-home",
+      "auth_files": [
+        "auth.json"
+      ]
+    }
+  },
+  "staged": {
+    "root": "/snapshot",
+    "files": [
+      {
+        "path": "PLAN.md",
+        "sha256": "d0225c077fa435ec2aa558467876295c4f7d97a429290a0c13234b743974fabd",
+        "bytes": 33975
+      }
+    ],
+    "count": 1,
+    "given": [
+      "ops/devlane/workflow/PLAN.md"
+    ],
+    "withheld": [
+      "ops/devlane/workflow/**.py"
+    ],
+    "noise_dropped": {
+      "declared_absent": "the source tree carried no build artefacts"
+    },
+    "proof": {
+      "tool": "stage.py",
+      "withheld_present": [],
+      "given_unmet": []
+    }
+  },
+  "doctrine": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "110344b713866f3adcf3e83870ea4c966abd3914eb379ec091d43f8a329443d0",
+        "in_force": true,
+        "evidence": "listed as a project instruction by codex"
+      }
+    ]
+  },
+  "brief": {
+    "role": "extractor",
+    "deliverables": [
+      {
+        "path": "extract/cli.py",
+        "interface": {
+          "name": "extractor-cli",
+          "argv": [
+            "--root",
+            "DIR",
+            "--out",
+            "PATH"
+          ],
+          "output": "file",
+          "fields": [
+            "facts",
+            "unresolved"
+          ],
+          "declared_at": "PLAN.md section 5"
+        }
+      }
+    ],
+    "report_fields": [
+      "RESULT",
+      "UNRESOLVED"
+    ],
+    "rules": [
+      "read no code outside the snapshot"
+    ],
+    "sha256": "b15535d84b376ff62d7aac818f4e545e5d9ff44b29cc642a3581fc38abdc4fbb",
+    "bytes": 4096
+  },
+  "task": {
+    "name": "describe-the-cli",
+    "requires": [
+      {
+        "what": "the plan's CLI section",
+        "satisfied_by": "PLAN.md",
+        "why": "the verbs come from it"
+      }
+    ],
+    "produces": [
+      {
+        "path": "extract/cli.py",
+        "interface": {
+          "name": "extractor-cli",
+          "argv": [
+            "--root",
+            "DIR",
+            "--out",
+            "PATH"
+          ],
+          "output": "file",
+          "fields": [
+            "facts",
+            "unresolved"
+          ],
+          "declared_at": "PLAN.md section 5"
+        }
+      }
+    ],
+    "report_fields": [
+      "RESULT",
+      "UNRESOLVED"
+    ]
+  },
+  "unmet_requirements": [],
+  "dangling_references": [],
+  "derived_from": "8a0ef21c4ae95b556ee7dc2c20975e336fd1b4fdb843bf1ead8a03eb97e63482"
+}

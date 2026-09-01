@@ -1,0 +1,48 @@
+{
+  "text": "{\"job\": \"review-u10\", \"status\": \"ok\", \"verdict\": null, \"counts\": {\"p1\": 0, \"p2\": 0, \"p3\": 0, \"opinions\": 0}, \"findings\": [], \"artifacts\": {}, \"spend\": {}, \"stamp\": {\"ref\": \"eb71df9bfab6c349093ebb7fabcea0aecfc83788\", \"started\": null, \"ended\": null}, \"note\": \"starting: reading briefs and review contract\"}",
+  "stopReason": "end_turn",
+  "sessionId": "11111111-1111-4111-8111-111111111111",
+  "requestId": "22222222-2222-4222-8222-222222222222",
+  "thought": "synthetic fixture reasoning placeholder",
+  "usage": {
+    "input_tokens": 18991,
+    "cache_read_input_tokens": 256,
+    "cache_creation_input_tokens": 0,
+    "output_tokens": 213,
+    "reasoning_tokens": 94,
+    "total_tokens": 19460
+  },
+  "num_turns": 1,
+  "total_cost_usd": 0.001000,
+  "total_cost_usd_ticks": 10000000,
+  "modelUsage": {
+    "grok-4.6-build": {
+      "inputTokens": 18991,
+      "outputTokens": 213,
+      "cacheReadInputTokens": 256,
+      "cacheCreationInputTokens": 0,
+      "modelCalls": 1,
+      "costUSD": 0.001000
+    }
+  },
+  "structuredOutput": {
+    "job": "review-u10",
+    "status": "ok",
+    "verdict": null,
+    "counts": {
+      "p1": 0,
+      "p2": 0,
+      "p3": 0,
+      "opinions": 0
+    },
+    "findings": [],
+    "artifacts": {},
+    "spend": {},
+    "stamp": {
+      "ref": "eb71df9bfab6c349093ebb7fabcea0aecfc83788",
+      "started": null,
+      "ended": null
+    },
+    "note": "starting: reading briefs and review contract"
+  }
+}

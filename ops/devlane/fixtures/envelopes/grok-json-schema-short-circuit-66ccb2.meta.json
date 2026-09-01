@@ -1,0 +1,9 @@
+{
+  "harness": "grok",
+  "cli_version": "1.0.5",
+  "captured": "2026-08-29T23:48:43Z",
+  "record": "20260829T234838Z-review-grok-66ccb2",
+  "source": "raw.out of the first live grok dispatch under the U10 launcher (--output-format json --json-schema <ENVELOPE_SCHEMA>)",
+  "shape": "one JSON wrapper with usage (modelCalls 1, outputTokens 213, costUSD 0.001000) and a structuredOutput that is a schema-valid envelope with status ok, no findings and note 'starting: reading briefs and review contract' \u2014 the turn ended after one model call",
+  "note": "Captured bytes, never edited. Evidence that grok's structured-output mode short-circuits the agentic loop; the launcher keeps plain output for grok until a probe row proves otherwise."
+}

@@ -1,0 +1,9 @@
+{
+  "derived_from": "controls/dispatchable-home.json",
+  "change": "task.produces states only the path; the interface is left for the law to copy across from the brief",
+  "expect_path": "task.produces",
+  "checked_by": "source",
+  "why": "presence is not enough for a unified pair: CUE fills the missing half from the other side, so the two copies agree because one of them was written by the law rather than by the author",
+  "finding": "predicted by a second reader as the next hole, confirmed by measurement before it was written",
+  "generated_by": "controls/build.py"
+}

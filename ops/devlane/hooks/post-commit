@@ -1,0 +1,39 @@
+#!/bin/sh
+# post-commit -- git-native crossing recorder (ops/devlane/hooks).
+#
+# Appends one JSONL entry to the clone-shared context stream after
+# every commit, carrying the new short SHA.
+#
+# This hook must never break git: every failure path is swallowed and
+# the exit status is always 0. If the stream cannot be written, the
+# record is lost and the commit succeeds anyway.
+
+json_escape() {
+    # Control characters would split or corrupt the JSONL record; they
+    # are never legitimate in these values, so newline/tab/CR become
+    # spaces and the rest are dropped before quoting is escaped.
+    printf '%s' "$1" | tr '\n\r\t' '   ' | tr -d '\000-\037' \
+        | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
+}
+
+record() {
+    common=$(git rev-parse --git-common-dir) || return 0
+    [ -n "$common" ] || return 0
+    top=$(git rev-parse --show-toplevel) || return 0
+    worktree=$(basename "$top") || return 0
+    agent="${WF_AGENT:-${USER:-unknown}}"
+    at=$(date -u +%Y-%m-%dT%H:%M:%SZ) || return 0
+    printf '{"at": "%s", "kind": "%s", "what": "%s", "detail": "", "agent": "%s", "worktree": "%s", "via": "git-hook"}\n' \
+        "$(json_escape "$at")" "$(json_escape "$1")" "$(json_escape "$2")" \
+        "$(json_escape "$agent")" "$(json_escape "$worktree")" \
+        >>"$common/claude-context-stream.jsonl" || return 0
+}
+
+main() {
+    short=$(git rev-parse --short HEAD) || return 0
+    [ -n "$short" ] || return 0
+    record "head" "head now at $short"
+}
+
+main "$@" >/dev/null 2>&1 || :
+exit 0

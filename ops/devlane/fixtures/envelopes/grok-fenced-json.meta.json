@@ -1,0 +1,8 @@
+{
+  "harness": "grok",
+  "cli_version": "unseen-in-records",
+  "captured": "constructed-2026-08-30",
+  "source": "docs-shaped pretty-printed nine-key object inside a ```json fence, for grok's mandatory --output-format plain path. Not a session dump.",
+  "shape": "narration sentence, then a ```json fence, then a pretty-printed ENVELOPE_SCHEMA object, then a closing fence. No single line is a complete JSON object.",
+  "note": "Constructed so a line- or NDJSON-oriented scan cannot recover the envelope. Regenerated, never presented as captured bytes. D-ENV-3 / skeptic 2fd473 P2."
+}
