@@ -19,4 +19,9 @@ jobs:
       - run: composer install --prefer-dist --no-progress --no-interaction
       - run: find src -name '*.php' -print0 | xargs -0 -r -n50 php -l
       - run: php bin/console about
-      - run: vendor/bin/mate tools:list
+      - name: mate serves measured truth
+        run: |
+          vendor/bin/mate tools:call symfony-services --query=router --limit=10 --format=json \
+            | jq -e '.untrusted_data.services["router.default"]'
+          php bin/console fixture:hello 2>/dev/null && { echo "fixture must not be in the workbench app itself"; exit 1; } || true
+          vendor/bin/mate tools:list
