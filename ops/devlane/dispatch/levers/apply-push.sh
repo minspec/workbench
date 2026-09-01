@@ -83,6 +83,20 @@ for item in "${denied[@]}"; do
     [[ -z "$item" || "$branch" != "$item" ]] || refuse "branch '$branch' is protected"
 done
 
+# The term wall pattern is configuration, never tree content: taken from
+# TERM_WALL, else from the gitignored ops/bin/term-wall.conf. Both guards
+# below need it, and a wall that cannot look never passes — no pattern is
+# a refusal, not a skip.
+if [[ -z "${TERM_WALL:-}" ]]; then
+    wall_conf="$LEVERS_DIR/../../../bin/term-wall.conf"
+    if [[ -f "$wall_conf" ]]; then
+        IFS= read -r TERM_WALL <"$wall_conf" || true
+    fi
+fi
+[[ -n "${TERM_WALL:-}" ]] ||
+    refuse "term wall pattern unavailable: TERM_WALL unset and ops/bin/term-wall.conf absent; the wall cannot look, so the lever cannot land"
+export TERM_WALL
+
 resolved_repo=$(realpath -e -- "$repo" 2>/dev/null) || refuse "--repo '$repo' does not resolve"
 git -C "$resolved_repo" rev-parse --git-dir >/dev/null 2>&1 || refuse "'$resolved_repo' is not a git repository"
 git -C "$resolved_repo" check-ref-format --branch "$branch" >/dev/null 2>&1 || refuse "invalid branch name '$branch'"
@@ -258,7 +272,7 @@ if ! git -C "$worktree" diff --cached --unified=0 -- >"$record_dir/staged.diff" 
     refuse "cannot read staged diff for content guard"
 fi
 python3 - "$record_dir/staged.diff" "$guard_report" <<'PY'
-import re,sys
+import os,re,sys
 diff,report=sys.argv[1:]
 added=[]           # (path, lineno_in_added_hunk, text)
 path=None
@@ -272,8 +286,9 @@ hits=[]
 home=re.compile(r"/home/[A-Za-z0-9._-]+/")
 # credential filenames introduced as content
 cred=re.compile(r"\b(auth\.json|id_rsa|id_ed25519|\.pem|\.p12|credentials(\.json)?)\b")
-# names this organisation does not use — never affirmed, negated, or cited
-wall=re.compile(r"s[c]ient[ _-]?db|u[s]cient",re.I)
+# names this organisation does not use — never affirmed, negated, or cited;
+# the pattern is configuration (TERM_WALL, exported by the lever), never here
+wall=re.compile(os.environ["TERM_WALL"],re.I)
 for p,text in added:
     pth=p or "(unknown)"
     if wall.search(text) or wall.search(pth):
@@ -304,11 +319,11 @@ else
     printf '%s\n' "$message_text" >"$record_dir/message.input"
 fi
 if ! python3 - "$record_dir/message.input" "$record_dir/message.final" "$job_id" "$patch_sha" <<'PY'
-import re,sys
+import os,re,sys
 src,out,job,digest=sys.argv[1:]
 s=open(src,encoding="utf-8").read().rstrip()
 if "\x00" in s or not s.strip(): raise SystemExit(1)
-if re.search(r"s[c]ient[ _-]?db|u[s]cient",s,re.I): raise SystemExit(2)  # the term wall, on the message
+if re.search(os.environ["TERM_WALL"],s,re.I): raise SystemExit(2)  # the term wall, on the message
 trailer=re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*: .+$")
 caller_last=re.split(r"\n[ \t]*\n",s)[-1].splitlines()
 separator="\n" if caller_last and all(trailer.match(x) for x in caller_last) else "\n\n"

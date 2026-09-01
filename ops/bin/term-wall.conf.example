@@ -1,0 +1,5 @@
+# Copy this file to the gitignored term-wall.conf beside it, holding the
+# real pattern: one line, an extended, case-insensitive regular expression
+# — the names this organisation does not use. The pattern is configuration,
+# never tree content; the line below is a placeholder, not the pattern.
+ex[a]mple-name
