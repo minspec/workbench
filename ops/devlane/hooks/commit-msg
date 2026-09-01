@@ -53,17 +53,27 @@ python3 "$check" --message-file "$msg_file" || {
 }
 
 # The term wall: names this organisation does not use, refused in the
-# message before it becomes history. Same convention as above — a clone
-# without the wall warns and lets the commit through; CI holds the wall.
+# message before it becomes history. Same convention as above — the hook
+# refuses only for the thing it is here to judge (a hit in the message,
+# exit 1); a wall that cannot look (exit 2: no pattern) or is absent
+# warns and lets the commit through; CI holds the wall.
 wall="$top/ops/devlane/workflow/checks/term_wall.py"
 if [ -f "$wall" ]; then
-    python3 "$wall" --message-file "$msg_file" || {
+    if [ -z "${TERM_WALL:-}" ] && [ -f "$top/ops/bin/term-wall.conf" ]; then
+        IFS= read -r TERM_WALL <"$top/ops/bin/term-wall.conf"
+        export TERM_WALL
+    fi
+    python3 "$wall" --message-file "$msg_file"
+    wall_rc=$?
+    if [ "$wall_rc" -eq 1 ]; then
         echo "" >&2
         echo "commit-msg: the message above was NOT committed." >&2
         echo "            It carries a name this organisation does not use" >&2
         echo "            (the hits are listed, masked). Rewrite without it." >&2
         exit 1
-    }
+    elif [ "$wall_rc" -ne 0 ]; then
+        echo "commit-msg: term wall cannot look here (no pattern) — letting the message through; CI holds the wall." >&2
+    fi
 else
     echo "commit-msg: term wall not present here — letting the message through; CI holds the wall." >&2
 fi
