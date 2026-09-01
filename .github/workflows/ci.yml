@@ -1,0 +1,22 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [dev, main]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+      - run: composer validate --strict
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ hashFiles('composer.lock') }}
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: find src -name '*.php' -print0 | xargs -0 -r -n50 php -l
+      - run: php bin/console about
+      - run: vendor/bin/mate tools:list
