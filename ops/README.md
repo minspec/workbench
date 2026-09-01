@@ -22,6 +22,23 @@ maintainer installs it at `ops/bin/dispatch.sh` when wanted; its
 staged text lives with the conductor session. Until then, delegation
 runs through peer sessions and the House dispatch lane.
 
+## The review
+
+Big PRs to dev — substantive code, doctrine, or workflow changes, as
+opposed to line fixes — take two independent passes before merge, each
+from a different harness than the author:
+
+- a **Codex security sweep**: supply chain, workflows, authority
+  boundaries, secrets
+- a **Grok audit**: correctness, internal consistency, test quality
+
+Both report on the wire (VERDICT / STAMP / FINDINGS with priorities;
+anything unexamined marked UNCHECKED — silence is not a declaration).
+The conductor dispatches both, applies findings through the lane
+crediting the finder, and merges only on an APPROVE or on a CHANGES
+whose P1/P2 findings are applied or explicitly ruled by the
+maintainer. Ratification of stable remains the maintainer's.
+
 ## The rules the lane binds
 
 - One line of work, one worktree (`../wt/<repo>/<slug>`); the main
