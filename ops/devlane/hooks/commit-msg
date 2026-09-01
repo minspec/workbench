@@ -51,3 +51,19 @@ python3 "$check" --message-file "$msg_file" || {
     echo "            Source: and Co-Authored-By:." >&2
     exit 1
 }
+
+# The term wall: names this organisation does not use, refused in the
+# message before it becomes history. Same convention as above — a clone
+# without the wall warns and lets the commit through; CI holds the wall.
+wall="$top/ops/devlane/workflow/checks/term_wall.py"
+if [ -f "$wall" ]; then
+    python3 "$wall" --message-file "$msg_file" || {
+        echo "" >&2
+        echo "commit-msg: the message above was NOT committed." >&2
+        echo "            It carries a name this organisation does not use" >&2
+        echo "            (the hits are listed, masked). Rewrite without it." >&2
+        exit 1
+    }
+else
+    echo "commit-msg: term wall not present here — letting the message through; CI holds the wall." >&2
+fi
