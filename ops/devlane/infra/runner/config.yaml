@@ -1,0 +1,13 @@
+runner:
+  capacity: 4
+  timeout: 30m
+  file: /data/.runner
+cache:
+  enabled: true
+  dir: /data/cache
+host:
+  workdir_parent: /tmp/act
+container:
+  docker_host: "-"
+  privileged: false
+  network: ""
