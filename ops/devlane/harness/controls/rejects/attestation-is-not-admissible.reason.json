@@ -1,0 +1,8 @@
+{
+  "derived_from": "hand-written: there is no passing attestation to derive it from, because #Admissible no longer has an attestation form",
+  "change": "a fully grounded attestation from an unadmitted actor",
+  "expect_path": "kind",
+  "why": "every condition an attestation could meet is set by the claimant -- the grounding booleans, the citation list, and the attestor's own name -- so admitting one on those terms is a schema that reads as diligence and checks nothing. It stays legal as #Attestation and illegal as #Admissible.",
+  "finding": "Codex, PR #40",
+  "definition": "#Admissible"
+}

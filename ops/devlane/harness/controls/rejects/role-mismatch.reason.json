@@ -1,0 +1,8 @@
+{
+  "derived_from": "controls/dispatchable-home.json",
+  "change": "brief.role \u2014 replaced",
+  "expect_path": "role",
+  "why": "nothing else stops a launcher handing a reviewer's instructions to an extractor",
+  "finding": "Codex, PR #40",
+  "generated_by": "controls/build.py"
+}
