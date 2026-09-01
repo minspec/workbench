@@ -1,36 +1,65 @@
 name: e2e
+# The org's one road test: package -> recipe -> endpoint -> app.
+# Canonical here; every repo that can break the road calls this same
+# workflow with its own PR slotted into the matching ref, siblings at
+# dev. Never weaken it; extend it.
 on:
   pull_request:
   push:
     branches: [dev, main]
+  workflow_call:
+    inputs:
+      skeleton_ref:
+        type: string
+        default: dev
+      recipes_ref:
+        type: string
+        default: dev
+      fixtures_ref:
+        type: string
+        default: dev
+      workbench_ref:
+        type: string
+        default: ''
 permissions:
   contents: read
 jobs:
   e2e:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout workbench (own run)
+        if: ${{ inputs.workbench_ref == '' }}
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: actions/checkout@v4
+          path: wb
+      - name: checkout workbench (called)
+        if: ${{ inputs.workbench_ref != '' }}
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          repository: minspec/workbench
+          ref: ${{ inputs.workbench_ref }}
           persist-credentials: false
+          path: wb
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
           repository: minspec/skeleton
-          ref: dev
+          ref: ${{ inputs.skeleton_ref || 'dev' }}
+          persist-credentials: false
           path: .e2e/skeleton
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          persist-credentials: false
           repository: minspec/workbench-fixtures
-          ref: dev
-          path: .e2e/fixtures
-      - uses: actions/checkout@v4
-        with:
+          ref: ${{ inputs.fixtures_ref || 'dev' }}
           persist-credentials: false
+          path: .e2e/fixtures
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
           repository: minspec/recipes
-          ref: dev
+          ref: ${{ inputs.recipes_ref || 'dev' }}
+          persist-credentials: false
           path: .e2e/recipes
-      - uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.4'
 
@@ -55,22 +84,22 @@ jobs:
           composer require minspec/fixture-hello:1.0.0 --no-interaction
 
       - name: assertions (independent test author)
-        run: bash tests/e2e/assert.sh .e2e/app
+        run: bash wb/tests/e2e/assert.sh .e2e/app
 
       - name: planted fault must fire
         run: |
-          # Corrupt the served recipe (parameter renamed) and serve it as a
-          # DIFFERENT endpoint (own port) so no cache can hand the broken
-          # arm the clean recipe. Prove the plant landed, then a fresh app
-          # build must fail. The clean arm above is the stay-quiet half.
+          # Corrupt the served recipe (parameter renamed, ref changed so no
+          # cache can launder the plant), serve it on its own port, prove
+          # the plant landed and did not leak, then a fresh app build must
+          # fail. The clean arm above is the stay-quiet half.
           mkdir -p .e2e/recipes-broken
           cp .e2e/recipes/index.json .e2e/recipes-broken/
           sed 's/fixture_hello.greeting/fixture_hello.wrong/' \
             .e2e/recipes/minspec.fixture-hello.1.0.json > .e2e/recipes-broken/minspec.fixture-hello.1.0.json
+          sed -i 's/e2e-fixture-1.0/e2e-broken-1.0/' .e2e/recipes-broken/minspec.fixture-hello.1.0.json
           grep -q 'fixture_hello.wrong' .e2e/recipes-broken/minspec.fixture-hello.1.0.json || { echo "plant did not land"; exit 1; }
           ! grep -q 'fixture_hello.wrong' .e2e/recipes/minspec.fixture-hello.1.0.json || { echo "plant leaked into clean fixture"; exit 1; }
           jq '._links.recipe_template = "http://127.0.0.1:8098/{package_dotted}.{version}.json" | .recipe_template = "http://127.0.0.1:8098/{package_dotted}.{version}.json"' .e2e/recipes-broken/index.json > .e2e/recipes-broken/index.tmp && mv .e2e/recipes-broken/index.tmp .e2e/recipes-broken/index.json
-          sed -i 's/e2e-fixture-1.0/e2e-broken-1.0/' .e2e/recipes-broken/minspec.fixture-hello.1.0.json
           (cd .e2e/recipes-broken && php -S 127.0.0.1:8098 &)
           sleep 1
           composer create-project minspec/skeleton .e2e/app-broken --repository="{\"type\":\"path\",\"url\":\"$GITHUB_WORKSPACE/.e2e/skeleton\"}" --stability=dev --no-interaction
