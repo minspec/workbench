@@ -3,11 +3,15 @@ on:
   pull_request:
   push:
     branches: [dev, main]
+permissions:
+  contents: read
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
