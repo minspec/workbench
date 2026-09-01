@@ -3,23 +3,30 @@ on:
   pull_request:
   push:
     branches: [dev, main]
+permissions:
+  contents: read
 jobs:
   e2e:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           repository: minspec/skeleton
           ref: dev
           path: .e2e/skeleton
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           repository: minspec/workbench-fixtures
           ref: dev
           path: .e2e/fixtures
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           repository: minspec/recipes
           ref: dev
           path: .e2e/recipes
@@ -30,7 +37,7 @@ jobs:
       - name: serve the recipes endpoint locally (clean arm)
         run: |
           cd .e2e/recipes
-          jq '.recipe_template = "http://127.0.0.1:8099/{package_dotted}.{version}.json"' index.json > index.tmp && mv index.tmp index.json
+          jq '._links.recipe_template = "http://127.0.0.1:8099/{package_dotted}.{version}.json" | .recipe_template = "http://127.0.0.1:8099/{package_dotted}.{version}.json"' index.json > index.tmp && mv index.tmp index.json
           php -S 127.0.0.1:8099 &
           sleep 1
           curl -fsS http://127.0.0.1:8099/index.json | jq -e '.recipes["minspec/fixture-hello"]'
@@ -62,7 +69,8 @@ jobs:
             .e2e/recipes/minspec.fixture-hello.1.0.json > .e2e/recipes-broken/minspec.fixture-hello.1.0.json
           grep -q 'fixture_hello.wrong' .e2e/recipes-broken/minspec.fixture-hello.1.0.json || { echo "plant did not land"; exit 1; }
           ! grep -q 'fixture_hello.wrong' .e2e/recipes/minspec.fixture-hello.1.0.json || { echo "plant leaked into clean fixture"; exit 1; }
-          jq '.recipe_template = "http://127.0.0.1:8098/{package_dotted}.{version}.json"' .e2e/recipes-broken/index.json > .e2e/recipes-broken/index.tmp && mv .e2e/recipes-broken/index.tmp .e2e/recipes-broken/index.json
+          jq '._links.recipe_template = "http://127.0.0.1:8098/{package_dotted}.{version}.json" | .recipe_template = "http://127.0.0.1:8098/{package_dotted}.{version}.json"' .e2e/recipes-broken/index.json > .e2e/recipes-broken/index.tmp && mv .e2e/recipes-broken/index.tmp .e2e/recipes-broken/index.json
+          sed -i 's/e2e-fixture-1.0/e2e-broken-1.0/' .e2e/recipes-broken/minspec.fixture-hello.1.0.json
           (cd .e2e/recipes-broken && php -S 127.0.0.1:8098 &)
           sleep 1
           composer create-project minspec/skeleton .e2e/app-broken --repository="{\"type\":\"path\",\"url\":\"$GITHUB_WORKSPACE/.e2e/skeleton\"}" --stability=dev --no-interaction
