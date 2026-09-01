@@ -1,0 +1,66 @@
+services:
+  gitea:
+    image: minspec/gitea-lane:${GITEA}
+    build:
+      context: .
+      dockerfile: gitea/Dockerfile
+      args:
+        GITEA: ${GITEA}
+    profiles: [ci]
+    user: "1000:1000"
+    environment:
+      USER: git
+      GITEA__security__INSTALL_LOCK: "true"
+      GITEA__database__DB_TYPE: sqlite3
+      GITEA__server__ROOT_URL: http://gitea:3000
+      GITEA__security__SECRET_KEY__FILE: /run/secrets/secret_key
+      GITEA__security__INTERNAL_TOKEN__FILE: /run/secrets/internal_token
+      GITEA__oauth2__JWT_SECRET__FILE: /run/secrets/jwt_secret
+    volumes:
+      - gitea-data:/var/lib/gitea
+      - gitea-config:/etc/gitea
+      - ../..:/workspace:ro
+      - type: bind
+        source: ./secrets/secret_key
+        target: /run/secrets/secret_key
+        read_only: true
+      - type: bind
+        source: ./secrets/internal_token
+        target: /run/secrets/internal_token
+        read_only: true
+      - type: bind
+        source: ./secrets/jwt_secret
+        target: /run/secrets/jwt_secret
+        read_only: true
+      - token:/run/runner-token
+
+  act_runner:
+    image: minspec/act-runner-lane:${ACT_RUNNER}
+    build:
+      context: .
+      dockerfile: runner/Dockerfile
+      args:
+        ACT_RUNNER: ${ACT_RUNNER}
+        LANE_TAG: ${LANE_TAG:?run ops/devlane/infra/build-lane.sh}
+    profiles: [ci]
+    privileged: false
+    depends_on:
+      - gitea
+    environment:
+      CONFIG_FILE: /usr/local/bin/config.yaml
+      GITEA_INSTANCE_URL: http://gitea:3000
+      RUNNER_LABELS: ubuntu-latest:host
+      LANE_TAG: ${LANE_TAG:?run ops/devlane/infra/build-lane.sh}
+    volumes:
+      - runner-data:/data
+      - token:/run/runner-token:ro
+      - type: bind
+        source: ./secrets/token
+        target: /run/secrets/token
+        read_only: true
+
+volumes:
+  gitea-data:
+  gitea-config:
+  runner-data:
+  token:
