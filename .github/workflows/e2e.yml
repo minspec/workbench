@@ -1,0 +1,77 @@
+name: e2e
+on:
+  pull_request:
+  push:
+    branches: [dev, main]
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: minspec/skeleton
+          ref: dev
+          path: .e2e/skeleton
+      - uses: actions/checkout@v4
+        with:
+          repository: minspec/workbench-fixtures
+          ref: dev
+          path: .e2e/fixtures
+      - uses: actions/checkout@v4
+        with:
+          repository: minspec/recipes
+          ref: dev
+          path: .e2e/recipes
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+
+      - name: serve the recipes endpoint locally (clean arm)
+        run: |
+          cd .e2e/recipes
+          jq '.recipe_template = "http://127.0.0.1:8099/{package_dotted}.{version}.json"' index.json > index.tmp && mv index.tmp index.json
+          php -S 127.0.0.1:8099 &
+          sleep 1
+          curl -fsS http://127.0.0.1:8099/index.json | jq -e '.recipes["minspec/fixture-hello"]'
+
+      - name: compose the app from the skeleton
+        run: |
+          composer create-project minspec/skeleton .e2e/app --repository="{\"type\":\"path\",\"url\":\"$GITHUB_WORKSPACE/.e2e/skeleton\"}" --stability=dev --no-interaction
+
+      - name: require fixture-hello through the endpoint
+        run: |
+          cd .e2e/app
+          composer config secure-http false
+          composer config repositories.fixtures "{\"type\":\"path\",\"url\":\"$GITHUB_WORKSPACE/.e2e/fixtures/packages/fixture-hello\"}"
+          composer config extra.symfony.endpoint --json "[\"http://127.0.0.1:8099/index.json\",\"flex://defaults\"]"
+          composer require minspec/fixture-hello:1.0.0 --no-interaction
+
+      - name: assertions (independent test author)
+        run: bash tests/e2e/assert.sh .e2e/app
+
+      - name: planted fault must fire
+        run: |
+          # Corrupt the served recipe (parameter renamed) and serve it as a
+          # DIFFERENT endpoint (own port) so no cache can hand the broken
+          # arm the clean recipe. Prove the plant landed, then a fresh app
+          # build must fail. The clean arm above is the stay-quiet half.
+          mkdir -p .e2e/recipes-broken
+          cp .e2e/recipes/index.json .e2e/recipes-broken/
+          sed 's/fixture_hello.greeting/fixture_hello.wrong/' \
+            .e2e/recipes/minspec.fixture-hello.1.0.json > .e2e/recipes-broken/minspec.fixture-hello.1.0.json
+          grep -q 'fixture_hello.wrong' .e2e/recipes-broken/minspec.fixture-hello.1.0.json || { echo "plant did not land"; exit 1; }
+          ! grep -q 'fixture_hello.wrong' .e2e/recipes/minspec.fixture-hello.1.0.json || { echo "plant leaked into clean fixture"; exit 1; }
+          jq '.recipe_template = "http://127.0.0.1:8098/{package_dotted}.{version}.json"' .e2e/recipes-broken/index.json > .e2e/recipes-broken/index.tmp && mv .e2e/recipes-broken/index.tmp .e2e/recipes-broken/index.json
+          (cd .e2e/recipes-broken && php -S 127.0.0.1:8098 &)
+          sleep 1
+          composer create-project minspec/skeleton .e2e/app-broken --repository="{\"type\":\"path\",\"url\":\"$GITHUB_WORKSPACE/.e2e/skeleton\"}" --stability=dev --no-interaction
+          cd .e2e/app-broken
+          composer config secure-http false
+          composer config repositories.fixtures "{\"type\":\"path\",\"url\":\"$GITHUB_WORKSPACE/.e2e/fixtures/packages/fixture-hello\"}"
+          composer config extra.symfony.endpoint --json "[\"http://127.0.0.1:8098/index.json\",\"flex://defaults\"]"
+          if composer require minspec/fixture-hello:1.0.0 --no-interaction >/dev/null 2>&1 && php bin/console list >/dev/null 2>&1; then
+            echo "planted fault did NOT fire — the oracle is blind"
+            exit 1
+          fi
+          echo "planted fault fired as required"
