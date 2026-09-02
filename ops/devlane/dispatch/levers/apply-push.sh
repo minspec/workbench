@@ -20,6 +20,8 @@ readonly LEVERS_DIR
 readonly JOBS_ROOT_DEFAULT="$LEVERS_DIR/jobs"
 readonly BRIDGE_NAME="Apply Push Bridge"
 readonly BRIDGE_EMAIL="noreply@apply-push-bridge"
+readonly AUTHOR_NAME="xormania"
+readonly AUTHOR_EMAIL="127287135+xormania@users.noreply.github.com"
 readonly SAFE_PATH="/usr/local/bin:/usr/bin:/bin"
 
 refuse() {
@@ -342,7 +344,7 @@ fi
 
 if ! env -i HOME="$OPERATOR_HOME" PATH="$SAFE_PATH" LANG=C.UTF-8 LC_ALL=C.UTF-8 \
     git -C "$worktree" -c user.name="$BRIDGE_NAME" -c user.email="$BRIDGE_EMAIL" \
-    commit --quiet --file "$record_dir/message.final" >"$record_dir/commit.log" 2>&1; then
+    commit --quiet --author="$AUTHOR_NAME <$AUTHOR_EMAIL>" --file "$record_dir/message.final" >"$record_dir/commit.log" 2>&1; then
     refuse "bridge could not author landing commit"
 fi
 new_sha=$(git -C "$worktree" rev-parse HEAD)
