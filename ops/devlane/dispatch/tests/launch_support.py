@@ -663,6 +663,18 @@ def sha256_file(path) -> str:
 
 
 def pid_is_alive(pid: int) -> bool:
+    # A group SIGKILL can leave a descendant as a zombie until the host's
+    # init process reaps it.  ``kill(pid, 0)`` still succeeds for zombies,
+    # even though they cannot execute and therefore are not survivors of the
+    # isolation boundary.  Check procfs first so the process-group assertion
+    # measures live workers rather than the reaping behaviour of PID 1 (which
+    # is notably delayed in some CI containers).
+    stat = Path(f"/proc/{pid}/stat")
+    try:
+        if stat.read_text(encoding="utf-8").split()[2] == "Z":
+            return False
+    except (FileNotFoundError, IndexError, OSError):
+        pass
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
