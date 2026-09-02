@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
   push:
-    branches: [dev, main]
+    branches: [dev, master]
 permissions:
   contents: read
 jobs:

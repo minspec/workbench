@@ -6,7 +6,7 @@ name: e2e
 on:
   pull_request:
   push:
-    branches: [dev, main]
+    branches: [dev, master]
   workflow_call:
     inputs:
       skeleton_ref:
