@@ -1307,6 +1307,14 @@ class ATrippedRunLeavesNothingBehind(unittest.TestCase):
 
     @staticmethod
     def _alive(pid):
+        # kill(0) also reports zombies as present.  A killed orphan can stay
+        # zombied until PID 1 reaps it in a container, but it is no longer a
+        # runnable descendant and must not make this isolation check flaky.
+        try:
+            if Path(f"/proc/{pid}/stat").read_text().split()[2] == "Z":
+                return False
+        except (FileNotFoundError, IndexError, OSError):
+            pass
         try:
             os.kill(pid, 0)
             return True
